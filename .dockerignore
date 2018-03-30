@@ -1,0 +1,10 @@
+.tox
+.git
+.gitignore
+Dockerfile
+LICENSE
+MANIFEST
+README.md
+setup.py
+test
+tox.ini
