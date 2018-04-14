@@ -1,15 +1,18 @@
 import json
 import sys
 import logging
+import os
+from definitions import Definitions
 
 
 class LoggerFactory:
-    __configuration_file_path = "logger/log.config"
+    __configuration_file_path = "log.config"
     __loggers = dict()
 
     @staticmethod
     def configure(logger_name):
-        configuration_data = json.load(open(LoggerFactory.__configuration_file_path))
+        path = os.path.join(Definitions.ROOT_DIR, LoggerFactory.__configuration_file_path)
+        configuration_data = json.load(open(path))
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.getLevelName(configuration_data["level"]))
 
@@ -27,7 +30,8 @@ class LoggerFactory:
                     mode = 'a'
                 else:
                     mode = 'w'
-                handler = logging.FileHandler(configuration_data["filePath"], mode)
+                file_path = os.path.join(Definitions.ROOT_DIR, configuration_data["filePath"])
+                handler = logging.FileHandler(file_path, mode)
                 handler.setFormatter(logging.Formatter(configuration_data["format"]))
                 logger.addHandler(handler)
         LoggerFactory.__loggers[logger_name] = logger
