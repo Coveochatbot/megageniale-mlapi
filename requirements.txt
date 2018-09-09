@@ -1,5 +1,5 @@
 nose
-flask
+flask==0.12.4
 pytest
 pytest-flask
 tensorflow
