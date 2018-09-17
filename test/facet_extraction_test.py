@@ -2,29 +2,35 @@ import unittest
 from mlapi.facet_extractor import FacetExtractor
 from definitions import Definitions
 from pathlib import Path
-from mlapi.model.facet import Facet
 
 
 class TestFacetExtractor(unittest.TestCase):
     TEST_FILE_A = Path(Definitions.ROOT_DIR + "/test/test_files/facet_extraction_test_file_a.json")
     TEST_FILE_B = Path(Definitions.ROOT_DIR + "/test/test_files/facet_extraction_test_file_b.json")
 
-    def test_simple_facet_extraction(self):
-        expected_facet = Facet("spacekey", "Connector")
+    def test_get_facets_by_document(self):
+        extractor = FacetExtractor()
 
-        actual_facet = FacetExtractor.extract_facet_from_file(TestFacetExtractor.TEST_FILE_A)
+        my_dic = extractor.get_facets_by_document([TestFacetExtractor.TEST_FILE_A, TestFacetExtractor.TEST_FILE_B])
 
-        self.assertEqual(expected_facet.name, actual_facet.name)
-        self.assertEqual(expected_facet.value, actual_facet.value)
+        self.assertEqual(my_dic['Document3'][0].name, "FacetA")
+        self.assertEqual(my_dic['Document1'][0].name, "FacetA")
+        self.assertEqual(my_dic['Document1'][1].name, "FacetB")
+        self.assertEqual(my_dic['Document2'][0].name, "FacetB")
 
-    def test_facet_extraction_from_file_list(self):
-        expected_facet_a = Facet("spacekey", "Connector")
-        expected_facet_b = Facet("testfacet", "ILoveDogs")
-        files = [TestFacetExtractor.TEST_FILE_A, TestFacetExtractor.TEST_FILE_B]
+    def test_invert_dictionary(self):
+        my_dic = {"A": ["1", "2"], "B": ["1"]}
 
-        actual_facets = FacetExtractor.get_facets_from_file(files)
+        inv_dic = FacetExtractor.invert_dictionary(my_dic)
 
-        self.assertEqual(expected_facet_a.name, actual_facets[0].name)
-        self.assertEqual(expected_facet_a.value, actual_facets[0].value)
-        self.assertEqual(expected_facet_b.name, actual_facets[1].name)
-        self.assertEqual(expected_facet_b.value, actual_facets[1].value)
+        self.assertEqual(inv_dic["1"][0], "A")
+        self.assertEqual(inv_dic["1"][1], "B")
+        self.assertEqual(inv_dic["2"][0], "A")
+
+    def test_extract_facet_from_file(self):
+        facet, document_uris = FacetExtractor.extract_facet_from_file(TestFacetExtractor.TEST_FILE_A)
+
+        self.assertEqual(facet.name, "FacetA")
+        self.assertEqual(facet.value, "FacetValueA")
+        self.assertEqual(document_uris[0], "Document3")
+        self.assertEqual(document_uris[1], "Document1")

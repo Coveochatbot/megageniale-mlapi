@@ -1,6 +1,14 @@
 {
-  "FacetName": "testfacet",
-  "FacetValue": "ILoveDogs",
+  "FacetName": "FacetB",
+  "FacetValue": "FacetValueB",
   "TrashField": "jijofejoiewf",
-  "Number": 2
+  "Number": 2,
+  "Documents": [
+    {
+      "ClickUri": "Document1"
+    },
+    {
+      "ClickUri": "Document2"
+    }
+  ]
 }
