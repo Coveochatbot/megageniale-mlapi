@@ -1,0 +1,14 @@
+{
+  "FacetName": "FacetA",
+  "FacetValue": "FacetValueA",
+  "TrashField": "jijofejoiewf",
+  "Number": 2,
+  "Documents": [
+    {
+      "ClickUri": "Document3"
+    },
+    {
+      "ClickUri": "Document1"
+    }
+  ]
+}
