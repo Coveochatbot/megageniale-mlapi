@@ -1,10 +1,14 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from mlapi.logger.logger_factory import LoggerFactory
+from mlapi.model.document import Document
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/ML/Analyze',  methods=['POST'])
 def hello_world():
-    return "Hello, World!"
+    content = request.get_json()
+    documents = [Document(val["Title"], val["Uri"], val["PrintableUri"], val["Summary"], val["Excerpt"]) for val in content]
+    questions = []
+    return jsonify(questions)
 
 if __name__ == '__main__':
     LoggerFactory.get_logger(__name__).info("API started")
