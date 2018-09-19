@@ -1,5 +1,7 @@
 from mlapi import app
+from flask import json
 import unittest
+
 
 class FlaskTest(unittest.TestCase):
 
@@ -7,10 +9,10 @@ class FlaskTest(unittest.TestCase):
         self.app = app.app.test_client()
         self.app.testing = True
 
-    def test_hello_world(self):
-        result = self.app.get('/')
+    def test_facets_endpoint(self):
+        documents = [{'Title': 'Title', 'Uri': 'Uri', 'PrintableUri': 'PrintableUri', 'Summary': 'Summary', 'Excerpt': 'Excerpt'}, {'Title': 'Title', 'Uri': 'Uri', 'PrintableUri': 'PrintableUri', 'Summary': 'Summary', 'Excerpt': 'Excerpt'}]
+        result = self.app.post('/ML/Analyze', data=json.dumps(documents), content_type='application/json')
         self.assertEqual(result.status_code, 200)
-        self.assertEqual(result.get_data().decode('utf-8'), "Hello, World!")
 
 
 if __name__ == '__main__':
