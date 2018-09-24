@@ -1,14 +1,12 @@
 from flask import Flask, request, jsonify
 from mlapi.logger.logger_factory import LoggerFactory
-from mlapi.model.document import Document
 from mlapi.MLJsonEncoder import MLJsonEncoder
 app = Flask(__name__)
 app.json_encoder = MLJsonEncoder
 
 @app.route('/ML/Analyze',  methods=['POST'])
 def ml_analyze():
-    content = request.get_json()
-    documents = [Document(val["Title"], val["Uri"], val["PrintableUri"], val["Summary"], val["Excerpt"]) for val in content]
+    documentsUri = request.get_json()
     questions = []
     return jsonify(questions)
 

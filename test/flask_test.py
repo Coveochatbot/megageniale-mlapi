@@ -10,7 +10,7 @@ class FlaskTest(unittest.TestCase):
         self.app.testing = True
 
     def test_facets_endpoint(self):
-        documents = [{'Title': 'Title', 'Uri': 'Uri', 'PrintableUri': 'PrintableUri', 'Summary': 'Summary', 'Excerpt': 'Excerpt'}, {'Title': 'Title', 'Uri': 'Uri', 'PrintableUri': 'PrintableUri', 'Summary': 'Summary', 'Excerpt': 'Excerpt'}]
+        documents = ['dfsdf', 'sdfsdf','sdfsdf','fsdfsdf']
         result = self.app.post('/ML/Analyze', data=json.dumps(documents), content_type='application/json')
         self.assertEqual(result.status_code, 200)
 
