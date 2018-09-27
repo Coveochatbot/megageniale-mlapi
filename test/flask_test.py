@@ -14,6 +14,11 @@ class FlaskTest(unittest.TestCase):
         result = self.app.post('/ML/Analyze', data=json.dumps(documents), content_type='application/json')
         self.assertEqual(result.status_code, 200)
 
+    def test_filter_facets_endpoint(self):
+        request = {'documents': ['uri1', 'uri2', 'uri3'], 'mustHaveFacets': [{'name': 'name1', 'value': 'value1'}, {'name': 'name2', 'value': 'value2'}], 'mustNotHaveFacets': [{'name': 'name3', 'value': 'value3'},{'name': 'name4', 'value': 'value4'}]}
+        result = self.app.post('/ML/Filter/Facets', data=json.dumps(request), content_type='application/json')
+        self.assertEqual(result.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main()
