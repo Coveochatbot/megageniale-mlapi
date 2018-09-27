@@ -14,9 +14,9 @@ def ml_analyze():
 @app.route('/ML/Filter/Facets', methods=['POST'])
 def filter_document_by_facets():
     content = request.get_json()
-    documents = content['documents']
-    mustHaveFacets = [Facet(val['name'], val['value']) for val in content['mustHaveFacets']]
-    mustNotHaveFacets = [Facet(val['name'], val['value']) for val in content['mustNotHaveFacets']]
+    documents = content['Documents']
+    mustHaveFacets = [Facet(val['Name'], val['Value']) for val in content['MustHaveFacets']]
+    mustNotHaveFacets = [Facet(val['Name'], val['Value']) for val in content['MustNotHaveFacets']]
     return jsonify()
 
 if __name__ == '__main__':
