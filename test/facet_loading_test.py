@@ -11,7 +11,7 @@ class TestFacetLoader(unittest.TestCase):
 
     def test_load_facets(self):
         facet_loader = FacetLoader()
-        test_dictionary = self.generate_test_data()
+        test_dictionary = self.generate_data()
 
         facet_loader.save_facets(test_dictionary, TestFacetLoader.TEST_FILE)
         facets = facet_loader.load_facets(TestFacetLoader.TEST_FILE)
@@ -19,14 +19,14 @@ class TestFacetLoader(unittest.TestCase):
         self.assertEqual(facets['document1'][0].name, "NameA")
         self.assertEqual(facets['document1'][1].name, "NameB")
         self.assertEqual(facets['document2'][0].name, "NameA")
-        self.cleanup_test_file()
+        self.cleanup_file()
 
-    def generate_test_data(self):
+    def generate_data(self):
         facetA = Facet("NameA", "ValueA")
         facetB = Facet("NameB", "ValueB")
         return {'document1': [facetA, facetB], 'document2': [facetA]}
 
-    def cleanup_test_file(self):
+    def cleanup_file(self):
         os.remove(TestFacetLoader.TEST_FILE)
 
 
