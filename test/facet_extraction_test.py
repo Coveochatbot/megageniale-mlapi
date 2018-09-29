@@ -5,8 +5,8 @@ from pathlib import Path
 
 
 class TestFacetExtractor(unittest.TestCase):
-    TEST_FILE_A = Path(Definitions.ROOT_DIR + "/test/test_files/facet_extraction_test_file_a.json")
-    TEST_FILE_B = Path(Definitions.ROOT_DIR + "/test/test_files/facet_extraction_test_file_b.json")
+    TEST_FILE_A = Path(Definitions.ROOT_DIR + "/test/test_files/facets/facet_extraction_test_file_a.json")
+    TEST_FILE_B = Path(Definitions.ROOT_DIR + "/test/test_files/facets/facet_extraction_test_file_b.json")
 
     def test_get_facets_by_document(self):
         extractor = FacetExtractor()
