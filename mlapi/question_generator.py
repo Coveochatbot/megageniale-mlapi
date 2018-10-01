@@ -1,5 +1,6 @@
 from collections import Counter
 from mlapi.model.question import Question
+import uuid
 
 
 class QuestionGenerator(object):
@@ -9,10 +10,8 @@ class QuestionGenerator(object):
 
         values_by_name = self.get_discriminating_facets(facets_by_document)
         questions = []
-        id = 0
         for key, values in values_by_name.items():
-            questions.append(Question(id=id, facet_name=key, facet_values=values, answer="", status=""))
-            id += 1
+            questions.append(Question(id=str(uuid.uuid4()), facet_name=key, facet_values=list(set(values)), answer="", status="None"))
         return questions
 
     def get_discriminating_facets(self, facets_by_document):

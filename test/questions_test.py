@@ -27,7 +27,6 @@ class TestQuestions(unittest.TestCase):
         self.assertEqual(len(questions), 1)
         self.assertEqual(questions[0].facet_name, "NameB")
         self.assertEqual(sorted(questions[0].facet_values), ['ValueB'])
-        self.assertEqual(questions[0].id, 0)
 
     def test_similar_values_different_facets_then_return_one_question(self):
         question_generator = QuestionGenerator()
@@ -39,7 +38,6 @@ class TestQuestions(unittest.TestCase):
         questions = question_generator.generate_questions(facets_by_document)
         self.assertEqual(questions[0].facet_name, "NameB")
         self.assertEqual(sorted(questions[0].facet_values), ['ValueB'])
-        self.assertTrue(questions[0].id == 0)
 
     def test_similar_values_different_facets_then_return_no_question(self):
         question_generator = QuestionGenerator()
@@ -62,9 +60,7 @@ class TestQuestions(unittest.TestCase):
         questions = sorted(question_generator.generate_questions(facets_by_document), key=lambda x: x.facet_name)
         self.assertEqual(questions[0].facet_name, 'NameA')
         self.assertEqual(sorted(questions[0].facet_values), ['ValueA', 'ValueB'])
-        self.assertTrue(questions[0].id == 0 or questions[0].id == 1)
         self.assertEqual(questions[1].facet_name, 'NameB')
         self.assertEqual(sorted(questions[1].facet_values), ['Value1', 'Value2'])
-        self.assertTrue(questions[1].id == 0 or questions[1].id == 1)
 
 
