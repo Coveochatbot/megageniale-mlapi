@@ -6,6 +6,8 @@ from mlapi.model.facet import Facet
 from mlapi.facet_extractor import FacetExtractor
 from mlapi.logger.logger_factory import LoggerFactory
 from mlapi.serialization.object_encoder import ObjectEncoder
+from mlapi.model.question import Question
+from mlapi.model.facet import Facet
 
 app = Flask(__name__)
 app.json_encoder = ObjectEncoder
@@ -14,7 +16,7 @@ app.json_encoder = ObjectEncoder
 @app.route('/ML/Analyze', methods=['POST'])
 def ml_analyze():
     documentsUri = request.get_json()
-    questions = []
+    questions = [Question("0f8fad5b-d9cb-469f-a165-708677283301", "@author", ["Simon", "Marc"], "", "None")]
     return jsonify(questions)
 
 
