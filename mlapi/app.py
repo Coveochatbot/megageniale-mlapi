@@ -30,11 +30,11 @@ def filter_document_by_facets():
     ###############
     documents = dict()
 
-    if "MustHaveFacets" in content:
+    if content['MustHaveFacets'] is not None:
         must_have_facets = [Facet(val['Name'], val['Value']) for val in content['MustHaveFacets']]
         documents = DocumentFilter.keep_documents_with_facets(documents, must_have_facets)
 
-    if "MustNotHaveFacets" in content:
+    if content['MustNotHaveFacets'] is not None:
         must_not_have_facets = [Facet(val['Name'], val['Value']) for val in content['MustNotHaveFacets']]
         documents = DocumentFilter.keep_documents_without_facets(documents, must_not_have_facets)
 
