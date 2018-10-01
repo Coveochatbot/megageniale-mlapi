@@ -24,10 +24,11 @@ def filter_document_by_facets():
     documents_to_filter = content['Documents']
 
     ############### Replace with actual dictionary when created
-    extractor = FacetExtractor()
-    all_documents = extractor.get_facets_by_document_in_directory(Definitions.FACETS_DIR)
-    documents = dict((k, all_documents[k]) for k in documents_to_filter if k in all_documents)
+    # extractor = FacetExtractor()
+    # all_documents = extractor.get_facets_by_document_in_directory(Definitions.FACETS_DIR)
+    # documents = dict((k, all_documents[k]) for k in documents_to_filter if k in all_documents)
     ###############
+    documents = dict()
 
     if "MustHaveFacets" in content:
         must_have_facets = [Facet(val['Name'], val['Value']) for val in content['MustHaveFacets']]
