@@ -1,22 +1,29 @@
 from flask import Flask, request, jsonify
 
+from pathlib import Path
 from definitions import Definitions
 from mlapi.document_filter import DocumentFilter
-from mlapi.model.facet import Facet
-from mlapi.facet_extractor import FacetExtractor
+from mlapi.facet_loader import FacetLoader
 from mlapi.logger.logger_factory import LoggerFactory
 from mlapi.serialization.object_encoder import ObjectEncoder
-from mlapi.model.question import Question
 from mlapi.model.facet import Facet
+from mlapi.question_generator import QuestionGenerator
+
+
+FACETS_FILE = Path(Definitions.ROOT_DIR + "/facets.bin")
 
 app = Flask(__name__)
 app.json_encoder = ObjectEncoder
+loader = FacetLoader()
+facets_by_document = loader.load_facets(FACETS_FILE)
 
 
 @app.route('/ML/Analyze', methods=['POST'])
 def ml_analyze():
-    documentsUri = request.get_json()
-    questions = [Question("0f8fad5b-d9cb-469f-a165-708677283301", "@author", ["Simon", "Marc"], "", "None")]
+    requested_documents = request.get_json()
+    documents = dict((k, facets_by_document[k]) for k in requested_documents if k in facets_by_document)
+    question_generator = QuestionGenerator()
+    questions = question_generator.generate_questions(documents)
     return jsonify(questions)
 
 
@@ -24,13 +31,7 @@ def ml_analyze():
 def filter_document_by_facets():
     content = request.get_json()
     documents_to_filter = content['Documents']
-
-    ############### Replace with actual dictionary when created
-    # extractor = FacetExtractor()
-    # all_documents = extractor.get_facets_by_document_in_directory(Definitions.FACETS_DIR)
-    # documents = dict((k, all_documents[k]) for k in documents_to_filter if k in all_documents)
-    ###############
-    documents = dict()
+    documents = dict((k, facets_by_document[k]) for k in documents_to_filter if k in facets_by_document)
 
     if content['MustHaveFacets'] is not None:
         must_have_facets = [Facet(val['Name'], val['Value']) for val in content['MustHaveFacets']]
