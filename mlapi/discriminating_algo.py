@@ -1,23 +1,22 @@
 import statistics
 
-class DiscriminatingAlgo(object):
-    # Discrimination parameters
+class DiscriminatingFacetsAlgo(object):
     facets_sample_count = 3  # minimum docs by facet to be accepted
-    tolerance_interval = 10 # max standard deviation accepted ()
+    tolerance_interval = 25 # max standard deviation accepted ()
     nbr_facet_values = 2 # to consider a facet as having a large number of values
 
-    facets = [] # names
-    step2 = {}
-    step3 = {}
+    result = {}
 
-    def discriminating_facets_algo(self, facets_by_document):
+    def get_discriminating_facets_algo(self, facets_by_document):
         documents_by_facet = self.inverse_dictionary(facets_by_document)
         data = self.get_formated_data(documents_by_facet)
         self.execute_algorithm(data)
-        if not (len(self.step3)):
+        if len(self.get_values_by_facet(self.result)) <= 1:
             self.adjust_parameters()
+            data.clear()
+            data = self.get_formated_data(documents_by_facet)
             self.execute_algorithm(data)
-        return self.get_values_by_facet(self.step3)
+        return self.get_values_by_facet(self.result)
 
     def inverse_dictionary(self, facets_by_document):
         documents_by_facet = {}
@@ -61,17 +60,16 @@ class DiscriminatingAlgo(object):
 
     def get_facet_sample(self, data):
         facet_values_by_facet_name = self.get_values_by_facet(data)
-        self.facets = self.get_facet_names(data)
-        cpt = 0
+        facet_names = self.get_facet_names(data)
+        docs_count = 0
         dictionary = {}
-        #count how many documents are in each facet
-        for index in range(len(self.facets)):
+        for index in range(len(facet_names)):
             for facet, docs in data.items():
-                if facet[0] is self.facets[index]:
-                    cpt += len(docs)
-            dictionary[self.facets[index]] = cpt
-            cpt = 0
-        # remove nondesired facets
+                if facet[0] is facet_names[index]:
+                    docs_count += len(docs)
+            dictionary[facet_names[index]] = docs_count
+            docs_count = 0
+
         for facet_name, nbr in dictionary.items():
             if (dictionary[facet_name] < self.facets_sample_count): # 1st filter
                 for fn, fv in facet_values_by_facet_name.items():
@@ -119,11 +117,9 @@ class DiscriminatingAlgo(object):
             data.pop(t)
 
     def adjust_parameters(self):
-        if not len(self.step2):
-            self.tolerance_interval + 10
+        self.tolerance_interval = self.tolerance_interval + 10
 
     def execute_algorithm(self, data):
         facets_sample = self.get_facet_sample(data)
-        self.step2 = self.get_equitably_distributed_facets(facets_sample)
-        self.step3 = self.get_facets_with_max_values(self.step2)
-
+        equitably_distributed_facets = self.get_equitably_distributed_facets(facets_sample)
+        self.result = self.get_facets_with_max_values(equitably_distributed_facets)
