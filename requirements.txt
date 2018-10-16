@@ -1,3 +1,4 @@
+requests
 nose
 flask==0.12.4
 pytest
