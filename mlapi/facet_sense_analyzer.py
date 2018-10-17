@@ -7,11 +7,11 @@ class FacetSenseAnalyzer(object):
     def __init__(self, facet_sense_api):
         self.facet_sense_api = facet_sense_api
 
-    def analyse(self, text):
+    def analyze(self, text):
         response = self.facet_sense_api.get_facet_scores(text)
-        return self.content_to_facet_dto(json.loads(response))
+        return self.content_to_facet_dtos(json.loads(response))
 
-    def content_to_facet_dto(self, content):
+    def content_to_facet_dtos(self, content):
         facets = []
 
         if 'facets' not in content:

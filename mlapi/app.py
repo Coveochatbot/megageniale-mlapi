@@ -26,7 +26,7 @@ facet_sense_analyzer = FacetSenseAnalyzer(facet_sense_api)
 @app.route('/ML/FacetSense', methods=['POST'])
 def facet_sense():
     content = request.get_json()
-    analysis = facet_sense_analyzer.analyse(content['Query'])
+    analysis = facet_sense_analyzer.analyze(content['Query'])
     return jsonify(analysis)
 
 

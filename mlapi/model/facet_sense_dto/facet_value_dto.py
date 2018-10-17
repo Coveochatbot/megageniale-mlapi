@@ -3,5 +3,5 @@ class FacetValueDto(object):
         self.value = value
         self.score = score
 
-    def to_json(self):
+    def to_dict(self):
         return {"value": self.value, "score": self.score}
