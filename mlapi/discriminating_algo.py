@@ -32,11 +32,11 @@ class DiscriminatingFacetsAlgo(object):
         for facet, docs in documents_by_facet.items():
             one_facet = (facet.name, facet.value)
             if one_facet not in unique_facets:
-                tuple = (facet.name, facet.value)
-                data[tuple] = docs
-                unique_facets.append(tuple)
+                element = (facet.name, facet.value)
+                data[element] = docs
+                unique_facets.append(element)
             elif one_facet in unique_facets:
-                data[tuple].append(docs)
+                data[element].append(docs)
         return data
 
     def get_facet_names(self, data):
