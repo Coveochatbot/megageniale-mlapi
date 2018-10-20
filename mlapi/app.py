@@ -8,6 +8,8 @@ from mlapi.logger.logger_factory import LoggerFactory
 from mlapi.serialization.object_encoder import ObjectEncoder
 from mlapi.model.facet import Facet
 from mlapi.question_generator import QuestionGenerator
+from mlapi.facet_sense_analyzer import FacetSenseAnalyzer
+from mlapi.facet_sense_api import FacetSenseApi
 
 
 FACETS_FILE = Path(Definitions.ROOT_DIR + "/facets.bin")
@@ -16,6 +18,16 @@ app = Flask(__name__)
 app.json_encoder = ObjectEncoder
 loader = FacetLoader()
 facets_by_document = loader.load_facets(FACETS_FILE)
+
+facet_sense_api = FacetSenseApi()
+facet_sense_analyzer = FacetSenseAnalyzer(facet_sense_api)
+
+
+@app.route('/ML/FacetSense', methods=['POST'])
+def facet_sense():
+    content = request.get_json()
+    analysis = facet_sense_analyzer.analyze(content['Query'])
+    return jsonify(analysis)
 
 
 @app.route('/ML/Analyze', methods=['POST'])
