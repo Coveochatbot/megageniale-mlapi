@@ -57,14 +57,14 @@ class DiscriminatingFacetsAlgo(object):
     def get_facet_sample(self, data):
         facet_values_by_facet_name = self.get_values_by_facet(data)
         facet_names = self.get_facet_names(data)
-        docs_count = 0
+        unique_docs = []
         dictionary = {}
         for index in range(len(facet_names)):
             for facet, docs in data.items():
                 if facet[0] is facet_names[index]:
-                    docs_count += len(docs)
-            dictionary[facet_names[index]] = docs_count
-            docs_count = 0
+                    unique_docs += [document for document in docs if document not  in unique_docs]
+            dictionary[facet_names[index]] = len(unique_docs)
+            unique_docs.clear()
 
         for facet_name, nbr in dictionary.items():
             if (dictionary[facet_name] < self.min_documents_per_facet):

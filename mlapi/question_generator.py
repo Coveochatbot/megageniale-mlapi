@@ -17,11 +17,8 @@ class QuestionGenerator(object):
 
     def get_discriminating_facets(self, facets_by_document):
         unique_facets_by_document = self.remove_redundancies_in_documents(facets_by_document)
-        facets = []
-        for key, values in unique_facets_by_document.items():
-            facets += values
-        algo = DiscriminatingFacetsAlgo()
-        return algo.get_discriminating_facets_algo(unique_facets_by_document)
+        algorithm = DiscriminatingFacetsAlgo()
+        return algorithm.get_discriminating_facets(unique_facets_by_document)
 
     def remove_redundancies_in_documents(self, facets_by_document):
         redundancies = self.get_redundancies(facets_by_document)
