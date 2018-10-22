@@ -14,7 +14,7 @@ class TestDiscriminatingFacets(unittest.TestCase):
         discriminating_facets = discriminating_algo.get_discriminating_facets(facets_by_document)
         self.assertEqual(len(discriminating_facets), 0)
 
-    def test_when_1_discriminating_facet_then_return_1_facet(self):
+    def test_when_1_discriminating_facet_then_rerun_algorithm_and_return_1_facet(self):
         discriminating_algo = DiscriminatingFacetsAlgo()
         facet_a1 = Facet('NameA', 'ValueA1')
         facet_a2 = Facet('NameA', 'ValueA2')
@@ -25,7 +25,7 @@ class TestDiscriminatingFacets(unittest.TestCase):
         self.assertEqual(len(discriminating_facets), 1)
         self.assertEqual(discriminating_facets["NameA"], ['ValueA1', 'ValueA2'])
 
-    def test_when_2_discriminating_facets_then_return_2_facet(self):
+    def test_when_2_discriminating_facets_then_run_one_time_algorithm_and_return_2_facets(self):
         discriminating_algo = DiscriminatingFacetsAlgo()
         facet_a1 = Facet('NameA', 'ValueA1')
         facet_a2 = Facet('NameA', 'ValueA2')
@@ -40,7 +40,7 @@ class TestDiscriminatingFacets(unittest.TestCase):
         self.assertEqual(discriminating_facets["NameA"], ['ValueA1', 'ValueA2'])
         self.assertEqual(discriminating_facets["NameC"], ['ValueC1', 'ValueC2', 'ValueC3'])
 
-    def test_when_facet_dont_have_enough_documents(self):
+    def test_when_facet_dont_have_3_documents_then_return_0_facet(self):
         discriminating_algo = DiscriminatingFacetsAlgo()
         facet_a1 = Facet('NameA', 'ValueA1')
         facet_a2 = Facet('NameA', 'ValueA2')
@@ -51,18 +51,16 @@ class TestDiscriminatingFacets(unittest.TestCase):
         discriminating_facets = discriminating_algo.get_discriminating_facets(facets_by_document)
         self.assertEqual(len(discriminating_facets), 0)
 
-    def test_when_facet_dont_have_enough_values(self):
+    def test_when_facet_dont_have_2_values_then_return_0_facet(self):
         discriminating_algo = DiscriminatingFacetsAlgo()
         facet_a = Facet('NameA', 'ValueA')
-        facet_b1 = Facet('NameB', 'ValueB1')
-        facet_b2 = Facet('NameB', 'ValueB2')
-        facets_by_document = {'1': [facet_a, facet_b1], '2': [facet_a, facet_b2], '3':[facet_b2], '4':[facet_a]}
+        facet_b = Facet('NameB', 'ValueB')
+        facets_by_document = {'1': [facet_a], '2': [facet_a], '3':[facet_b], '4':[facet_a]}
 
         discriminating_facets = discriminating_algo.get_discriminating_facets(facets_by_document)
-        self.assertEqual(len(discriminating_facets), 1)
-        self.assertEqual(discriminating_facets["NameB"], ['ValueB1', 'ValueB2'])
+        self.assertEqual(len(discriminating_facets), 0)
 
-    def test_when_document_counts_in_facet_values_have_high_standard_deviation(self):
+    def test_when_document_counts_in_facet_values_have_more_than_35_in_standard_deviation_then_return_0_facet(self):
         discriminating_algo = DiscriminatingFacetsAlgo()
         facet_a1 = Facet('NameA', 'ValueA1')
         facet_a2 = Facet('NameA', 'ValueA2')

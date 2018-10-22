@@ -21,8 +21,7 @@ class TestQuestions(unittest.TestCase):
         question_generator = QuestionGenerator()
         facet_a1 = Facet('NameA', 'ValueA1')
         facet_a2 = Facet('NameA', 'ValueA2')
-        facet_b = Facet('NameB', 'ValueB')
-        facets_by_document = {'1': [facet_a1], '2': [facet_a2], '3': [facet_a2], '4': [facet_b]}
+        facets_by_document = {'1': [facet_a1], '2': [facet_a2], '3': [facet_a2]}
 
         questions = question_generator.generate_questions(facets_by_document)
         self.assertEqual(len(questions), 1)
@@ -47,8 +46,7 @@ class TestQuestions(unittest.TestCase):
         question_generator = QuestionGenerator()
         facet_a1 = Facet('NameA', 'ValueA')
         facet_a2 = Facet('NameA', 'ValueA')
-        facet_a3 = Facet('NameA', 'ValueA')
-        facets_by_document = {'1': [facet_a1], '2': [facet_a2], '3': [facet_a3]}
+        facets_by_document = {'1': [facet_a1], '2': [facet_a2], '3': [facet_a2]}
 
         questions = question_generator.generate_questions(facets_by_document)
         self.assertEqual(len(questions), 0)
@@ -62,12 +60,10 @@ class TestQuestions(unittest.TestCase):
         facet_e = Facet('NameB', 'Value2')
         facet_f = Facet('NameB', 'Value3')
         facet_g = Facet('NameB', 'Value4')
-        facets_by_document = {'1': [facet_a, facet_e, facet_c, facet_g], '2': [facet_b, facet_d, facet_f, facet_g], '3': [facet_a, facet_g]}
+        facets_by_document = {'1': [facet_a, facet_e, facet_c, facet_g], '2': [facet_b, facet_d, facet_f, facet_g], '3': [facet_a, facet_g, facet_f]}
 
         questions = sorted(question_generator.generate_questions(facets_by_document), key=lambda x: x.facet_name)
         self.assertEqual(questions[0].facet_name, 'NameA')
         self.assertEqual(sorted(questions[0].facet_values), ['ValueA', 'ValueB', 'ValueC'])
         self.assertEqual(questions[1].facet_name, 'NameB')
         self.assertEqual(sorted(questions[1].facet_values), ['Value1', 'Value2', 'Value3'])
-
-

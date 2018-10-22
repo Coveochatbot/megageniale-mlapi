@@ -1,4 +1,6 @@
 import statistics
+from  mlapi.utilities import invert_dictionary
+
 
 class DiscriminatingFacetsAlgo(object):
     def __init__(self):
@@ -7,115 +9,85 @@ class DiscriminatingFacetsAlgo(object):
         self. min_values_per_facet = 2
 
     def get_discriminating_facets(self, facets_by_document):
-        documents_by_facet = self.inverse_dictionary(facets_by_document)
-        data = self.get_formated_data(documents_by_facet)
-        result = self.execute_algorithm(data)
-        if len(self.get_values_by_facet(result)) <= 1:
+        documents_by_facet = invert_dictionary(facets_by_document)
+        unique_documents_by_facet = self.get_unique_documents_by_facet(documents_by_facet)
+        documents_by_discriminating_facets = self.execute_discriminating_facets_algorithm(unique_documents_by_facet)
+        if len(self.get_values_by_facet(documents_by_discriminating_facets)) <= 1:
             self.adjust_parameters()
-            data.clear()
-            result.clear()
-            data = self.get_formated_data(documents_by_facet)
-            result = self.execute_algorithm(data)
-        return self.get_values_by_facet(result)
+            unique_documents_by_facet.clear()
+            documents_by_discriminating_facets.clear()
+            unique_documents_by_facet = self.get_unique_documents_by_facet(documents_by_facet)
+            documents_by_discriminating_facets = self.execute_discriminating_facets_algorithm(unique_documents_by_facet)
+        return self.get_values_by_facet(documents_by_discriminating_facets)
 
-    def inverse_dictionary(self, facets_by_document):
-        documents_by_facet = {}
-        for k, v in facets_by_document.items():
-            for value in v:
-                documents_by_facet[value] = documents_by_facet.get(value, [])
-                documents_by_facet[value].append(k)
-        return documents_by_facet
-
-    def get_formated_data(self, documents_by_facet):
-        data = {}
+    def get_unique_documents_by_facet(self, documents_by_facet):
+        unique_documents_by_facet = {}
         unique_facets = []
-        for facet, docs in documents_by_facet.items():
-            one_facet = (facet.name, facet.value)
-            if one_facet not in unique_facets:
-                element = (facet.name, facet.value)
-                data[element] = docs
-                unique_facets.append(element)
-            elif one_facet in unique_facets:
-                data[element].append(docs)
-        return data
+        for facet, documents in documents_by_facet.items():
+            unique_facet = (facet.name, facet.value)
+            if unique_facet not in unique_facets:
+                unique_documents_by_facet[unique_facet] = documents
+                unique_facets.append(unique_facet)
+            elif unique_facet in unique_facets:
+                unique_documents_by_facet[unique_facet].append(documents)
+        return unique_documents_by_facet
 
-    def get_facet_names(self, data):
-        return list({facet[0] for facet in data.keys()})
+    def get_facet_names(self, unique_documents_by_facet):
+        return list({facet[0] for facet in unique_documents_by_facet.keys()})
 
-    def get_values_by_facet(self,data):
-        dict = {}
+    def get_values_by_facet(self,unique_documents_by_facet):
+        values_by_facet = {}
         unique_facets = []
-        if data:
-            for facet, docs in data.items():
+        if unique_documents_by_facet:
+            for facet, documents in unique_documents_by_facet.items():
                 if facet[0] not in unique_facets:
-                    dict[facet[0]] = [facet[1]]
+                    values_by_facet[facet[0]] = [facet[1]]
                     unique_facets.append(facet[0])
                 elif facet[0] in unique_facets:
-                    dict[facet[0]].append(facet[1])
-        return dict
+                    values_by_facet[facet[0]].append(facet[1])
+        return values_by_facet
 
-    def get_facet_sample(self, data):
-        facet_values_by_facet_name = self.get_values_by_facet(data)
-        facet_names = self.get_facet_names(data)
-        unique_docs = []
-        dictionary = {}
+    def get_facet_sample(self, unique_documents_by_facet):
+        facet_names = self.get_facet_names(unique_documents_by_facet)
+        documents_count_by_facet_name = {}
         for index in range(len(facet_names)):
-            for facet, docs in data.items():
+            unique_documents = set()
+            for facet, documents in unique_documents_by_facet.items():
                 if facet[0] is facet_names[index]:
-                    unique_docs += [document for document in docs if document not  in unique_docs]
-            dictionary[facet_names[index]] = len(unique_docs)
-            unique_docs.clear()
+                    unique_documents.update(documents)
+            documents_count_by_facet_name[facet_names[index]] = len(unique_documents)
 
-        for facet_name, nbr in dictionary.items():
-            if (dictionary[facet_name] < self.min_documents_per_facet):
-                for fn, fv in facet_values_by_facet_name.items():
-                    if facet_name is fn:
-                        for i in range(len(fv)):
-                            one_facet = (fn, fv[i])
-                            data.pop(one_facet)
-        return data
+        return {facet: documents for (facet, documents) in unique_documents_by_facet.items()
+                        if (documents_count_by_facet_name[facet[0]] >= self.min_documents_per_facet)}
 
-    def get_uniformly_distributed_facets(self, data):
-        docs_count_by_facet_value = {}
+    def get_uniformly_distributed_facets(self, unique_documents_by_facet):
         standard_deviation = 50
-        facet_names = self.get_facet_names(data)
-        facet_values_by_facet_name = self.get_values_by_facet(data)
-        for facet, docs in data.items():
-            docs_count_by_facet_value[facet] = len(docs)
-        for f_n in facet_names:
+        unique_facet_names = self.get_facet_names(unique_documents_by_facet)
+        facet_values_by_facet_name = self.get_values_by_facet(unique_documents_by_facet)
+        documents_count_by_facet_value = {facet: len(documents) for (facet, documents) in unique_documents_by_facet.items()}
+        for unique_facet_name in unique_facet_names:
             counts = []
-            for facet, nbr in docs_count_by_facet_value.items():
-                if facet[0] == f_n:
+            for facet, nbr in documents_count_by_facet_value.items():
+                if facet[0] == unique_facet_name:
                     counts.append(nbr)
             if len(counts)>= 2:
                 standard_deviation = statistics.stdev(counts)
             if standard_deviation > self.max_standard_deviation:
                 for facet_name, values in facet_values_by_facet_name.items():
-                    if (facet_name == f_n):
+                    if (facet_name == unique_facet_name):
                         for value in values:
-                            one_facet = (f_n, value)
-                            data.pop(one_facet)
-        return data
+                            unique_documents_by_facet.pop((unique_facet_name, value))
+        return unique_documents_by_facet
 
-    def get_facets_with_max_values(self, data):
-        facet_values_by_facet_name = self.get_values_by_facet(data)
-        facets_to_remove = []
-        for facet_name, values in facet_values_by_facet_name.items():
-            if len(values) < self.min_values_per_facet:
-                for value in values:
-                    one_facet = (facet_name, value)
-                    facets_to_remove.append(one_facet)
-        self.remove_entries(facets_to_remove, data)
-        return data
-
-    def remove_entries(self, list_of_tuples, data):
-        for facet in list_of_tuples:
-            data.pop(facet)
+    def get_facets_with_max_values(self, unique_documents_by_facet):
+        facet_values_by_facet_name = self.get_values_by_facet(unique_documents_by_facet)
+        return {facet: documents for (facet, documents) in unique_documents_by_facet.items()
+                if len(facet_values_by_facet_name[facet[0]]) >= self.min_values_per_facet}
 
     def adjust_parameters(self):
         self.max_standard_deviation = self.max_standard_deviation + 10
 
-    def execute_algorithm(self, data):
-        facets_sample = self.get_facet_sample(data)
+    def execute_discriminating_facets_algorithm(self, unique_documents_by_facet):
+        facets_sample = self.get_facet_sample(unique_documents_by_facet)
         uniformly_distributed_facets = self.get_uniformly_distributed_facets(facets_sample)
         return self.get_facets_with_max_values(uniformly_distributed_facets)
