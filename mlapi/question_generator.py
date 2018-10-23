@@ -1,5 +1,6 @@
 from collections import Counter
 from mlapi.model.question import Question
+from mlapi.discriminating_algo import DiscriminatingFacetsAlgo
 import uuid
 
 
@@ -16,16 +17,8 @@ class QuestionGenerator(object):
 
     def get_discriminating_facets(self, facets_by_document):
         unique_facets_by_document = self.remove_redundancies_in_documents(facets_by_document)
-        facets = []
-        for key, values in unique_facets_by_document.items():
-            facets += values
-        discriminating_facets = {}
-        for facet in facets:
-            if facet.name not in discriminating_facets:
-                discriminating_facets[facet.name] = [facet.value]
-            else:
-                discriminating_facets[facet.name].append(facet.value)
-        return discriminating_facets
+        algorithm = DiscriminatingFacetsAlgo()
+        return algorithm.get_discriminating_facets(unique_facets_by_document)
 
     def remove_redundancies_in_documents(self, facets_by_document):
         redundancies = self.get_redundancies(facets_by_document)
