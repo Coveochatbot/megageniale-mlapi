@@ -1,7 +1,7 @@
 import unittest
 
-from mlapi.analytics.get_suggested_documents_from_past_searches import get_parts_of_speech, \
-    get_searches_containing_context_entities
+from mlapi.analytics.get_suggested_documents_from_past_searches import get_words_and_parts_of_speech, \
+    get_searches_containing_context_entities, get_searches_scores
 
 
 class TestIdentifyWordsInSearches(unittest.TestCase):
@@ -56,10 +56,76 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
         self.assertEqual(actual_result, expected_result)
 
     def test_identify_words_in_searches(self):
-        test_search = "throw your banana"
+        test_search = ["throw", "your", "banana"]
         expected_results = {
             "banana": "NN",
             "your": "PRP$",
             "throw": "VB"
         }
-        self.assertEqual(get_parts_of_speech(test_search), expected_results)
+        self.assertEqual(get_words_and_parts_of_speech(test_search), expected_results)
+
+    def test_get_search_score(self):
+        searches_containing_context_entities = {
+            "throw your banana": {
+                "throw",
+                "banana"
+            },
+            "you love banana": {
+                "banana",
+                "you"
+            }
+        }
+        parts_of_speech_scores = {
+            "NN": 5,
+            "NNS": 5,
+            "VB": 2,
+            "VBP": 2,
+            "PRP": 2
+        }
+        expected_search_scores = {
+            "throw your banana": 7,
+            "you love banana": 7
+        }
+        self.assertEqual(
+            expected_search_scores,
+            get_searches_scores(searches_containing_context_entities, parts_of_speech_scores)
+        )
+
+    def test_get_search_score_with_duplicates_only_counts_word_once(self):
+        searches_containing_context_entities = {
+            "throw your banana and banana": {
+                "throw",
+                "banana"
+            }
+        }
+        parts_of_speech_scores = {
+            "NN": 5,
+            "VB": 2,
+        }
+        expected_search_scores = {
+            "throw your banana and banana": 7
+        }
+        self.assertEqual(
+            expected_search_scores,
+            get_searches_scores(searches_containing_context_entities, parts_of_speech_scores)
+        )
+
+    def test_get_search_score_only_count_words_in_context_entities(self):
+        searches_containing_context_entities = {
+            "throw your banana": {
+                "throw",
+                "banana"
+            }
+        }
+        parts_of_speech_scores = {
+            "NN": 5,
+            "VB": 2,
+            "PRP$": 42
+        }
+        expected_search_scores = {
+            "throw your banana": 7
+        }
+        self.assertEqual(
+            expected_search_scores,
+            get_searches_scores(searches_containing_context_entities, parts_of_speech_scores)
+        )
