@@ -43,6 +43,14 @@ def ml_analyze():
     return jsonify(questions)
 
 
+@app.route('/ML/Analytics', methods=['GET'])
+def get_suggested_documents_from_past_searches():
+    content = request.get_json()
+    context_entities = content['ContextEntities']
+    suggested_documents_limit = content['SuggestedDocumentsLimit']
+
+
+
 @app.route('/ML/Filter/Facets', methods=['POST'])
 def filter_document_by_facets():
     content = request.get_json()
