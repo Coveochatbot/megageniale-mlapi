@@ -28,3 +28,12 @@ def get_searches_scores(searches_containing_context_entities, parts_of_speech_sc
                 score += parts_of_speech_scores[part_of_speech] if part_of_speech in parts_of_speech_scores else 0
         searches_scores[search] = score
     return searches_scores
+
+
+def get_searches_relative_scores(context_entities, search_scores, parts_of_speech_scores):
+    context_entities_string = " ".join(context_entities)
+    max_score = get_searches_scores(
+        {context_entities_string: context_entities},
+        parts_of_speech_scores
+    )[context_entities_string]
+    return {search: search_scores[search] / max_score for search in search_scores.keys()}

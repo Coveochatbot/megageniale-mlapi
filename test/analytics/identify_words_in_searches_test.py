@@ -1,7 +1,7 @@
 import unittest
 
 from mlapi.analytics.get_suggested_documents_from_past_searches import get_words_and_parts_of_speech, \
-    get_searches_containing_context_entities, get_searches_scores
+    get_searches_containing_context_entities, get_searches_scores, get_searches_relative_scores
 
 
 class TestIdentifyWordsInSearches(unittest.TestCase):
@@ -128,4 +128,23 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
         self.assertEqual(
             expected_search_scores,
             get_searches_scores(searches_containing_context_entities, parts_of_speech_scores)
+        )
+
+    def test_get_searches_relative_scores(self):
+        context_entities = {"throw", "banana"}
+        search_scores = {
+            "throw your banana": 4,
+            "throw your apple": 2
+        }
+        parts_of_speech_scores = {
+            "NN": 2,
+            "VB": 2
+        }
+        expected_search_scores = {
+            "throw your banana": 1,
+            "throw your apple": 1/2
+        }
+        self.assertEqual(
+            expected_search_scores,
+            get_searches_relative_scores(context_entities, search_scores, parts_of_speech_scores)
         )
