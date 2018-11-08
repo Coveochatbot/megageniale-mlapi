@@ -37,3 +37,25 @@ def get_searches_relative_scores(context_entities, search_scores, parts_of_speec
         parts_of_speech_scores
     )[context_entities_string]
     return {search: search_scores[search] / max_score for search in search_scores.keys()}
+
+
+def get_suggested_documents(
+        suggested_documents_limit,
+        searches_relative_scores,
+        documents_popularity_mapping,
+        searches_documents_mapping,
+        relative_scores_threshold):
+    searches_relative_scores_over_threshold = {
+        search: relative_score
+        for search, relative_score in searches_relative_scores.items()
+        if relative_score > relative_scores_threshold
+    }
+    documents_relatives_scores = defaultdict(float)
+    for search, documents in searches_documents_mapping.items():
+        if search not in searches_relative_scores_over_threshold:
+            continue
+        if (documents in documents_relatives_scores
+                and documents_relatives_scores[documents] < searches_relative_scores[search]):
+            documents_relatives_scores[documents] = searches_relative_scores[search]
+        if documents not in documents_relatives_scores:
+            documents_relatives_scores[documents] = searches_relative_scores[search]
