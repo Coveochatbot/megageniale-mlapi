@@ -12,6 +12,7 @@ from mlapi.facet_sense_analyzer import FacetSenseAnalyzer
 from mlapi.facet_sense_api import FacetSenseApi
 from mlapi.facet_dictionary import FacetDictionary
 from mlapi.model.facet_values import FacetValues
+from mlapi.analytics.get_suggested_documents import get_suggested_documents_from_analytics
 
 
 FACETS_FILE = Path(Definitions.ROOT_DIR + "/facets.bin")
@@ -43,12 +44,13 @@ def ml_analyze():
     return jsonify(questions)
 
 
-@app.route('/ML/Analytics', methods=['GET'])
-def get_suggested_documents_from_past_searches():
+@app.route('/ML/Analytics', methods=['POST'])
+def analytics_analysis():
     content = request.get_json()
     context_entities = content['ContextEntities']
     suggested_documents_limit = content['SuggestedDocumentsLimit']
-
+    suggested_documents = get_suggested_documents_from_analytics(context_entities, suggested_documents_limit)
+    return jsonify(suggested_documents)
 
 
 @app.route('/ML/Filter/Facets', methods=['POST'])
