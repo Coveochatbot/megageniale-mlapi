@@ -1,7 +1,7 @@
 import unittest
 
-from mlapi.analytics.get_suggested_documents_from_past_searches import get_words_and_parts_of_speech, \
-    get_searches_containing_context_entities, get_searches_scores, get_searches_relative_scores
+from mlapi.analytics.get_suggested_documents import get_words_and_parts_of_speech, \
+    get_searches_containing_context_entities, get_searches_scores, get_searches_relative_scores, get_suggested_documents
 
 
 class TestIdentifyWordsInSearches(unittest.TestCase):
@@ -147,4 +147,43 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
         self.assertEqual(
             expected_search_scores,
             get_searches_relative_scores(context_entities, search_scores, parts_of_speech_scores)
+        )
+
+    def test_get_suggested_documents(self):
+        suggested_documents_limit = 4
+        searches_relative_scores ={
+            "throw your banana": 1,
+            "throw your apple": 1/2,
+            "throw your orange": 1/2,
+            "don't do that": 1/4
+        }
+        documents_popularity_mapping = {
+            "a": 90,
+            "b": 50,
+            "c": 2,
+            "d": 98,
+            "e": 25,
+            "f": 200,
+            "g": 1000,
+            "h": 800,
+            "i": 800
+        }
+        searches_documents_mapping = {
+            "throw your banana": ["a","b","c","y"],
+            "throw your apple": ["d","e","f"],
+            "don't do that": ["g"],
+            "please no": ["h"],
+            "again!?": ["z"]
+        }
+        relative_scores_threshold = 1/4
+        expected_suggested_documents = ["f","a","b","d"]
+        self.assertEqual(
+            expected_suggested_documents,
+            get_suggested_documents(
+                suggested_documents_limit,
+                searches_relative_scores,
+                documents_popularity_mapping,
+                searches_documents_mapping,
+                relative_scores_threshold
+            )
         )

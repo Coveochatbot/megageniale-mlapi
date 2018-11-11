@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import nltk
+import operator
 
 nltk.download('averaged_perceptron_tagger')
 
@@ -54,8 +55,15 @@ def get_suggested_documents(
     for search, documents in searches_documents_mapping.items():
         if search not in searches_relative_scores_over_threshold:
             continue
-        if (documents in documents_relatives_scores
-                and documents_relatives_scores[documents] < searches_relative_scores[search]):
-            documents_relatives_scores[documents] = searches_relative_scores[search]
-        if documents not in documents_relatives_scores:
-            documents_relatives_scores[documents] = searches_relative_scores[search]
+        for document in documents:
+            if document in documents_relatives_scores and documents_relatives_scores[document] < searches_relative_scores[search]:
+                documents_relatives_scores[document] = searches_relative_scores[search]
+            if document not in documents_relatives_scores:
+                documents_relatives_scores[document] = searches_relative_scores[search]
+    documents_scores = {
+        document: relative_score * documents_popularity_mapping[document]
+        for document, relative_score in documents_relatives_scores.items()
+        if document in documents_popularity_mapping
+    }
+    suggested_documents_scores = sorted(documents_scores.items(), key=operator.itemgetter(1), reverse=True)[:suggested_documents_limit]
+    return [suggested_document_score[0] for suggested_document_score in suggested_documents_scores]
