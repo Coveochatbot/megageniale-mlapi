@@ -1,10 +1,19 @@
 import unittest
 
 from mlapi.analytics.get_suggested_documents import get_words_and_parts_of_speech, \
-    get_searches_containing_context_entities, get_searches_scores, get_searches_relative_scores, get_suggested_documents
+    get_searches_containing_context_entities, get_searches_scores, get_searches_relative_scores, \
+    get_suggested_documents, get_max_score
 
 
 class TestIdentifyWordsInSearches(unittest.TestCase):
+    def test_get_max_score(self):
+        context_entities = {"throw", "banana"}
+        parts_of_speech_scores = {
+            "VB": 2,
+            "NN": 2,
+        }
+        self.assertEqual(get_max_score(context_entities, parts_of_speech_scores), 4)
+
     def test_get_searches_containing_context_entities_find_searches_with_at_least_one_same_word(self):
         searches_documents_mapping = {
             "i am a key": [
@@ -26,7 +35,7 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
                 "key"
             }
         }
-        actual_result = get_searches_containing_context_entities(searches_documents_mapping, context_entities)
+        actual_result = get_searches_containing_context_entities(searches_documents_mapping, context_entities, 1, 1, 3)
         self.assertEqual(actual_result, expected_result)
 
     def test_get_searches_containing_context_entities_returns_all_same_words(self):
@@ -52,7 +61,33 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
                 "another"
             }
         }
-        actual_result = get_searches_containing_context_entities(searches_documents_mapping, context_entities)
+        actual_result = get_searches_containing_context_entities(searches_documents_mapping, context_entities, 1, 1, 3)
+        self.assertEqual(actual_result, expected_result)
+
+    def test_get_searches_containing_context_entities_returns_only_searches_that_can_have_a_score_over_threshold(self):
+        searches_documents_mapping = {
+            "i am a key": [
+                "i am a link"
+            ],
+            "another key": [
+                "another link"
+            ],
+            "no same word but key": [
+                "another link"
+            ]
+        }
+        context_entities = {"key", "another", "a"}
+        expected_result = {
+            "i am a key": {
+                "key",
+                "a"
+            },
+            "another key": {
+                "key",
+                "another"
+            }
+        }
+        actual_result = get_searches_containing_context_entities(searches_documents_mapping, context_entities, 6, 1, 3)
         self.assertEqual(actual_result, expected_result)
 
     def test_identify_words_in_searches(self):
@@ -131,14 +166,9 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
         )
 
     def test_get_searches_relative_scores(self):
-        context_entities = {"throw", "banana"}
         search_scores = {
             "throw your banana": 4,
             "throw your apple": 2
-        }
-        parts_of_speech_scores = {
-            "NN": 2,
-            "VB": 2
         }
         expected_search_scores = {
             "throw your banana": 1,
@@ -146,7 +176,7 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
         }
         self.assertEqual(
             expected_search_scores,
-            get_searches_relative_scores(context_entities, search_scores, parts_of_speech_scores)
+            get_searches_relative_scores(search_scores, 4)
         )
 
     def test_get_suggested_documents(self):
@@ -175,7 +205,7 @@ class TestIdentifyWordsInSearches(unittest.TestCase):
             "please no": ["h"],
             "again!?": ["z"]
         }
-        relative_scores_threshold = 1/4
+        relative_scores_threshold = 1/3
         expected_suggested_documents = ["f","a","b","d"]
         self.assertEqual(
             expected_suggested_documents,

@@ -11,16 +11,17 @@ nltk.download('averaged_perceptron_tagger')
 DOCUMENTS_POPULARITY_MAPPING_PATH = Path(Definitions.ROOT_DIR + "/documents_popularity.json")
 DOCUMENTS_SEARCHES_MAPPING_PATH = Path(Definitions.ROOT_DIR + "/documents_searches_mapping.json")
 
-RELATIVE_SCORES_THRESHOLD = 0.8
+RELATIVE_SCORES_THRESHOLD = 0.5
+MAX_PART_OF_SPEECH_SCORE = 3
 PARTS_OF_SPEECH_SCORES = {
-    "FW": 3,
-    "NNP": 3,
-    "NNPS": 3,
+    "FW": MAX_PART_OF_SPEECH_SCORE,
+    "NNP": MAX_PART_OF_SPEECH_SCORE,
+    "NNPS": MAX_PART_OF_SPEECH_SCORE,
     "JJ": 1,
     "JJR": 1,
     "JJS": 1,
-    "NN": 1,
-    "NNS": 1,
+    "NN": MAX_PART_OF_SPEECH_SCORE,
+    "NNS": MAX_PART_OF_SPEECH_SCORE,
     "RB": 1,
     "RBR": 1,
     "RBS": 1,
@@ -31,15 +32,6 @@ PARTS_OF_SPEECH_SCORES = {
     "VBP": 1,
     "VBZ": 1
 }
-
-
-def get_searches_containing_context_entities(searches_documents_mapping, context_entities):
-    searches_containing_context_entities = defaultdict(set)
-    for search in searches_documents_mapping:
-        for context_entity in context_entities:
-            if context_entity in search.split():
-                searches_containing_context_entities[search].add(context_entity)
-    return searches_containing_context_entities
 
 
 def get_words_and_parts_of_speech(speech):
@@ -58,13 +50,33 @@ def get_searches_scores(searches_containing_context_entities, parts_of_speech_sc
     return searches_scores
 
 
-def get_searches_relative_scores(context_entities, searches_scores, parts_of_speech_scores):
+def get_max_score(context_entities, parts_of_speech_scores):
     context_entities_string = " ".join(context_entities)
-    max_score = get_searches_scores(
+    return get_searches_scores(
         {context_entities_string: context_entities},
         parts_of_speech_scores
     )[context_entities_string]
+
+
+def get_searches_relative_scores(searches_scores, max_score):
     return {search: searches_scores[search] / max_score for search in searches_scores.keys()}
+
+
+def get_searches_containing_context_entities(
+        searches_documents_mapping,
+        context_entities,
+        max_score,
+        relative_scores_threshold,
+        max_part_of_speech_score):
+    searches_containing_context_entities = {}
+    for search in searches_documents_mapping:
+        context_entities_in_search = set()
+        for context_entity in context_entities:
+            if context_entity in search.split():
+                context_entities_in_search.add(context_entity)
+        if len(context_entities_in_search) * max_part_of_speech_score >= max_score * relative_scores_threshold:
+            searches_containing_context_entities[search] = context_entities_in_search
+    return searches_containing_context_entities
 
 
 def get_suggested_documents(
@@ -76,7 +88,7 @@ def get_suggested_documents(
     searches_relative_scores_over_threshold = {
         search: relative_score
         for search, relative_score in searches_relative_scores.items()
-        if relative_score > relative_scores_threshold
+        if relative_score >= relative_scores_threshold
     }
     documents_relatives_scores = defaultdict(float)
     for search, documents in searches_documents_mapping.items():
@@ -101,9 +113,16 @@ def get_suggested_documents_from_analytics(context_entities, suggested_documents
         documents_popularity_mapping = json.load(documents_popularity_mapping_file)
     with open(DOCUMENTS_SEARCHES_MAPPING_PATH) as documents_searches_mapping_file:
         searches_documents_mapping = json.load(documents_searches_mapping_file)
-    searches_containing_context_entities = get_searches_containing_context_entities(searches_documents_mapping, context_entities)
+    max_score = get_max_score(context_entities, PARTS_OF_SPEECH_SCORES)
+    searches_containing_context_entities = get_searches_containing_context_entities(
+        searches_documents_mapping,
+        context_entities,
+        max_score,
+        RELATIVE_SCORES_THRESHOLD,
+        MAX_PART_OF_SPEECH_SCORE
+    )
     searches_scores = get_searches_scores(searches_containing_context_entities, PARTS_OF_SPEECH_SCORES)
-    searches_relative_scores = get_searches_relative_scores(context_entities, searches_scores, PARTS_OF_SPEECH_SCORES)
+    searches_relative_scores = get_searches_relative_scores(searches_scores, max_score)
     return get_suggested_documents(
         suggested_documents_limit,
         searches_relative_scores,
