@@ -1,4 +1,4 @@
-![alt text](https://travis-ci.org/CoveoWhisper/MLAPI.svg?branch=master)
+[![Build Status](https://travis-ci.org/Coveochatbot/megageniale-mlapi.svg?branch=development)](https://travis-ci.org/Coveochatbot/megageniale-mlapi)
 
 ## MLAPI
 
